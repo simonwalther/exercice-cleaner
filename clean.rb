@@ -68,7 +68,7 @@ else
     end
 
     percentage_deleted = ((nb_deleted_file.to_f/total_file)*100).to_i
-    puts "\nnombre de fichier detruit : #{nb_deleted_file}"
-    puts "pourcentage de fichier detruit : #{percentage_deleted}%"
+    puts "\nnumber of deleted file : #{nb_deleted_file}"
+    puts "percentage of deleted file : #{percentage_deleted}%"
   end
 end
