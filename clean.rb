@@ -8,67 +8,46 @@
 # UTILITY : destroy old file and empty folder
 # ARGUMMENT : optional path, nb day old, type of file
 
-
+#### LIB ####
 require 'fileutils' #lib for remove directory
-normal_path = nil
-nb_day = 30
-parmaters = 0
-actual_date = Time.new
-why_deleted = " "
-type = nil
-nb_deleted_file = 0
 
-ARGV.each do|argumment|
+### CONST ###
+SYSTEM_FILES = %w{ . .. .Ds_store }
 
-  case parmaters
-  when 0
-    normal_path = argumment
-  when 1
-    nb_day = argumment.to_i
-  when 2
-    type = argumment.to_s
-  end
+normal_path  = ARGV[0].to_s
+nb_day       = ARGV[1].to_i || 30
+type         = ARGV[2].to_s
+raise ArgumentError, 'you must give a path' if normal_path.empty?
 
-  parmaters += 1
+actual_date  = Time.new
+normal_path  = File.expand_path(normal_path)
+raise ArgumentError, "this is the racine of your computer" if normal_path == '/'
+
+files = Dir.glob(normal_path + "/**/*#{type}").reverse.reject{ |p| SYSTEM_FILES.include?(p) }
+total_file = files.count
+
+if total_file == 0
+  puts "there is no file !"
+  return exit(0)
 end
 
-if(normal_path == nil || normal_path == "/" || normal_path == "./" || normal_path == "~/")
-  puts "an error occured : #0 this is the racine of your computer"
-else
-  file = Dir.glob(normal_path + "/**/*#{type}").reverse
-  no_system_file = %w{ . .. .DS_Store}
-  total_file = file.size
-  
-  if(total_file == 0)
-    puts "an error occured : #1 there is no file"
-  else
-    def remove_file(nb_file, why_deleted)
-        puts "#{why_deleted}"
-        FileUtils.rm_rf(nb_file)
+files.each do |path|
+  modification_date = File.mtime(path)
+  difference = ((actual_date.year - modification_date.year)*365) + (actual_date.yday - modification_date.yday)
+  if difference >= nb_day
+    FileUtils.rm_rf(path)
+
+  elsif File.directory?(path)
+
+    if (Dir.entries(path).reject { |p| SYSTEM_FILES.include?(p) } ).count == 0
+      FileUtils.rm_rf(path)
     end
-
-    file.each do |nb_file|
-      modification_date = File.mtime(nb_file)
-      difference = ((actual_date.year - modification_date.year)*365) + (actual_date.yday - modification_date.yday)
-      is_directory = File.directory?(nb_file)
-
-      if(difference >= nb_day)
-        why_deleted = "[old file/directory]  "
-        remove_file(nb_file, why_deleted)
-        nb_deleted_file += 1
-      elsif(is_directory == true) #vide sans compter les . .. ou .DS_Store
-        if((Dir.entries(nb_file) - no_system_file).size == 0)
-          why_deleted = "[empty directory]  "
-          remove_file(nb_file, why_deleted)
-          nb_deleted_file += 1
-        end
-      else
-        puts "[not destroyed]  "
-      end
-    end
-
-    percentage_deleted = ((nb_deleted_file.to_f/total_file)*100).to_i
-    puts "\nnumber of deleted file : #{nb_deleted_file}"
-    puts "percentage of deleted file : #{percentage_deleted}%"
   end
 end
+
+nb_file_after = (Dir.glob(normal_path + "/**/*#{type}").reverse.reject{ |p| SYSTEM_FILES.include?(p) }).count
+nb_deleted_file =  total_file - nb_file_after
+percentage_deleted = ((nb_deleted_file.to_f/total_file)*100).to_i
+
+puts "number of deleted file : #{nb_deleted_file}"
+puts "percentage of deleted file : #{percentage_deleted}%"
