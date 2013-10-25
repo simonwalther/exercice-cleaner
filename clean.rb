@@ -3,7 +3,7 @@
 
 #######
 # CREATOR : Walther Simon
-# LAST RELEASED : 17 octobre 2013
+# LAST RELEASED : 25 octobre 2013
 # USE : fileutils
 # UTILITY : destroy old file and empty folder
 # ARGUMMENT : optional path, nb day old, type of file
@@ -34,11 +34,10 @@ end
 files.each do |path|
   modification_date = File.mtime(path)
   difference = ((actual_date.year - modification_date.year)*365) + (actual_date.yday - modification_date.yday)
+
   if difference >= nb_day
     FileUtils.rm_rf(path)
-
   elsif File.directory?(path)
-
     if (Dir.entries(path).reject { |p| SYSTEM_FILES.include?(p) } ).count == 0
       FileUtils.rm_rf(path)
     end
