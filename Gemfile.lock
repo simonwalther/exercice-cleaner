@@ -1,10 +1,12 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    highline (1.6.20)
     slop (3.4.6)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  highline
   slop

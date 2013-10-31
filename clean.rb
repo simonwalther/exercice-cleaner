@@ -10,7 +10,8 @@
 
 #### LIB ####
 require 'fileutils' #lib for remove directory
-require 'slop'
+require 'slop' #lib for argumment
+require 'highline/import' #lib for questions user
 
 ### CONST ###
 SYSTEM_FILES = %w{ . .. .Ds_store }
@@ -24,6 +25,7 @@ opts = Slop.new(help: true) do
   on :xclude=, 'exclude type', argumment: :optional
   on :v, :verbose, 'Enable verbose mode'
   on :dry, 'Enable dry mode'
+  on :confirmation, 'Enabe confirmation mode'
 end
 
 begin
@@ -41,6 +43,7 @@ if opts.verbose? || opts.dry?
   puts "exclude type : #{opts[:xclude]}"
   puts "verbose ? : #{opts.verbose?}"
   puts "dry ? : #{opts.dry?}"
+  puts "confirmation ? : #{opts.confirmation?}"
   puts "missings : #{opts.missing.join(', ')}\n\n"
 end
 
@@ -48,6 +51,7 @@ normal_path  = opts[:path]
 nb_day       = opts[:days]
 type         = opts[:type]
 exclude_type = opts[:xclude]
+confirmation = opts[:confirmation]
 
 raise ArgumentError, 'you must give a path' if normal_path.empty?
 
@@ -84,7 +88,17 @@ files.each do |path|
     end
 
     if opts.dry? == false
-      FileUtils.rm_rf(path)
+      if opts.confirmation? == true
+
+        say("Do you want to delete #{path} ?")
+        choose do |menu|
+          menu.prompt = "==>"
+          menu.choice :yes do FileUtils.rm_rf(path) end
+          menu.choices :no do say("not delete") end
+        end
+      else
+        FileUtils.rm_rf(path)
+      end
     else
       nb_deleted_file += 1
     end
@@ -95,7 +109,16 @@ files.each do |path|
       end
 
       if opts.dry? == false
-        FileUtils.rm_rf(path)
+        if opts.confirmation? == true
+
+          say("Do you want to delete #{path} ?")
+          choose do |menu|
+            menu.choice :yes do FileUtils.rm_rf(path) end
+            menu.choices :no do say("not delete") end
+          end
+        else
+          FileUtils.rm_rf(path)
+        end
       else
         nb_deleted_file += 1
       end
