@@ -66,7 +66,7 @@ files = (Dir.glob(normal_path + "/**/*#{type}").reverse.reject{ |p| SYSTEM_FILES
 total_file = files.count
 
 if total_file == 0
-  puts "there is no file !"
+  puts "\033[31mthere is no file !\033[0m\n"
   exit 0
 end
 
@@ -92,7 +92,6 @@ files.each do |path|
 
         say("Do you want to delete #{path} ?")
         choose do |menu|
-          menu.prompt = "==>"
           menu.choice :yes do FileUtils.rm_rf(path) end
           menu.choices :no do say("not delete") end
         end
