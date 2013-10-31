@@ -1,0 +1,10 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    slop (3.4.6)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  slop
